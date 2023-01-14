@@ -1,19 +1,23 @@
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Trial extends Task {
     int cardinalNr;
     int nrSets;
-    int chosenSets;
+    int nrSelectedSets;
 
+    String answer;
     int[][] sets;
     ArrayList<Integer>[] containingSets;
+    int[] selectedSets;
 
     @Override
     public void solve() throws IOException, InterruptedException {
         readProblemData();
         formulateOracleQuestion();
+        askOracle();
+        decipherOracleAnswer();
+        writeAnswer();
     }
 
     @Override
@@ -22,10 +26,11 @@ public class Trial extends Task {
         String[] numbers = bufferedReader.readLine().split(" ");
         cardinalNr = Integer.parseInt(numbers[0]);
         nrSets = Integer.parseInt(numbers[1]);
-        chosenSets = Integer.parseInt(numbers[2]);
+        nrSelectedSets = Integer.parseInt(numbers[2]);
 
         sets = new int[nrSets][];
         containingSets = new ArrayList[cardinalNr];
+        selectedSets = new int[nrSelectedSets];
 
         for (int i = 0; i < cardinalNr; i++) {
             containingSets[i] = new ArrayList<>();
@@ -39,14 +44,7 @@ public class Trial extends Task {
                 int element;
                 element = Integer.parseInt(numbers[j + 1]);
                 sets[i][j] = element;
-                containingSets[element].add(i);
-            }
-        }
-
-        for (int[] set : sets) {
-            System.out.println();
-            for (int value : set) {
-                System.out.printf("%d ", value);
+                containingSets[element - 1].add(i + 1);
             }
         }
     }
@@ -56,10 +54,10 @@ public class Trial extends Task {
         File oracleInput = new File("sat.cnf");
         FileWriter fileWriter = new FileWriter(oracleInput);
 
-        int nrEqu = chosenSets + cardinalNr + nrSets + chosenSets * nrSets * (nrSets - 1) / 2;
-        fileWriter.write("p cnf " + 2 * nrSets + " " + nrEqu + "\n");
+        int nrEqu = nrSelectedSets + cardinalNr + nrSets + nrSelectedSets * nrSets * (nrSets - 1) / 2;
+        fileWriter.write("p cnf " + nrSelectedSets * nrSets + " " + nrEqu + "\n");
 
-        for (int i = 0; i < chosenSets; i++) {
+        for (int i = 0; i < nrSelectedSets; i++) {
             for (int j = 1; j <= nrSets; j++) {
                 fileWriter.write((j + i * nrSets) + " ");
             }
@@ -67,23 +65,30 @@ public class Trial extends Task {
         }
 
         for (int i = 1; i <= nrSets; i++) {
-            for (int j = 0; j < chosenSets; j++) {
-                fileWriter.write(-(i + j * nrSets) + " ");
+            for (int j = 0; j < nrSelectedSets; j++) {
+                String string = -(i + j * nrSets) + " ";
+                for (int k = j + 1; k < nrSelectedSets; k++) {
+                    fileWriter.write(string + -(i + k * nrSets) + " 0\n");
+                }
             }
-            fileWriter.write(0 + "\n");
         }
 
-        for (int i = 0; i < chosenSets; i++) {
+        for (int i = 0; i < nrSelectedSets; i++) {
             for (int j = 1; j <= nrSets; j++) {
-                String string = (-j - i * nrSets) + " ";
-                for (int l = j + 1; l <= nrSets; l++) {
-                    fileWriter.write(string + (-l - i * nrSets) + " 0\n");
+                String string = -(j + i * nrSets) + " ";
+                for (int k = j + 1; k <= nrSets; k++) {
+                    fileWriter.write(string + -(k + i * nrSets) + " 0\n");
                 }
             }
         }
 
         for (int i = 0; i < cardinalNr; i++) {
-
+            for (int j = 0; j < nrSelectedSets; j++) {
+                for (int k = 0; k < containingSets[i].size(); k++) {
+                    fileWriter.write((containingSets[i].get(k) + j * nrSets) + " ");
+                }
+            }
+            fileWriter.write("0\n");
         }
 
         fileWriter.close();
@@ -91,12 +96,37 @@ public class Trial extends Task {
 
     @Override
     public void decipherOracleAnswer() throws IOException {
+        File oracleAnswer = new File("sat.sol");
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(oracleAnswer));
+        answer = bufferedReader.readLine();
 
+        if (answer.equals("True")) {
+            int nrVariables = Integer.parseInt(bufferedReader.readLine());
+            String[] numbers = bufferedReader.readLine().split(" ");
+            int j = 0;
+            for (int i = 0; i < nrVariables; i++) {
+                int variable = Integer.parseInt(numbers[i]);
+                if (variable > 0) {
+                    if (nrSets < variable)
+                        selectedSets[j] = variable % nrSets;
+                    else
+                        selectedSets[j] = variable;
+                    j++;
+                }
+            }
+        }
     }
 
     @Override
     public void writeAnswer() throws IOException {
-
+        System.out.println(answer);
+        if (answer.equals("True")) {
+            System.out.println(nrSelectedSets);
+            for (int i = 0; i < nrSelectedSets; i++) {
+                System.out.printf("%d ", selectedSets[i]);
+            }
+            System.out.println();
+        }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
