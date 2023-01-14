@@ -1,22 +1,24 @@
 build: trial rise redemption
 
+BUILD_PATH = ./build
+
 run_trial:
-	java Trial
+	java -cp $(BUILD_PATH) Trial
 
 run_rise:
-	java Rise
+	java -cp $(BUILD_PATH) Rise
 
 run_redemption:
-	java Redemption
+	java -cp $(BUILD_PATH) Redemption
 
-trial: Trial.java Task.java
-	javac $^
+trial: src/Trial.java src/Task.java
+	javac -d $(BUILD_PATH) $^
 
-rise: Rise.java Task.java
-	javac $^
+rise: src/Rise.java src/Task.java
+	javac -d $(BUILD_PATH) $^
 
-redemption: Redemption.java Task.java
-	javac $^
+redemption: src/Redemption.java src/Task.java
+	javac -d $(BUILD_PATH) $^
 
 clean:
 	rm -f *.class
