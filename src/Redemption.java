@@ -9,6 +9,8 @@ public class Redemption extends Task {
     ArrayList<String> wantedCards = new ArrayList<>();
     HashMap<String, Integer> neededCardsIndex = new HashMap<>();
 
+    ArrayList<ArrayList<Integer>> containingSets = new ArrayList<>();
+
     ArrayList<Integer> selectedSets = new ArrayList<>();
 
     @Override
@@ -30,6 +32,10 @@ public class Redemption extends Task {
             wantedCards.add(card);
         }
 
+        for (int i = 0; i < neededCardsIndex.size(); i++) {
+            containingSets.add(new ArrayList<>());
+        }
+
         for (int i = 0; i < nrSets; i++) {
             int nrCards = Integer.parseInt(bufferedReader.readLine());
             sets.add(i, new LinkedList<>());
@@ -38,6 +44,7 @@ public class Redemption extends Task {
                 Integer index = neededCardsIndex.get(card);
                 if (index != null) {
                     sets.get(i).add(index);
+                    containingSets.get(index - 1).add(i + 1);
                 }
             }
         }
@@ -64,23 +71,26 @@ public class Redemption extends Task {
         readProblemData();
 
         while (true) {
-            LinkedList<Integer> largestList = null;
-            int index = 0;
-            for (int i = 0; i < sets.size(); i++) {
-                if (sets.get(i).size() > 0 && largestList == null) {
-                    largestList = sets.get(i);
-                    index = i;
-                } else if (largestList == null)
-                    continue;
+            ArrayList<Integer> setIndexes = containingSets.stream().max(Comparator.comparing(ArrayList::size)).get();
 
-                if (largestList.size() < sets.get(i).size()) {
-                    largestList = sets.get(i);
-                    index = i;
+            if (setIndexes.size() == 0)
+                break;
+
+            LinkedList<Integer> largestList = sets.get(setIndexes.get(0));
+            for (Integer setIndex : setIndexes) {
+                if (largestList.size() < sets.get(setIndex - 1).size()) {
+                    largestList = sets.get(setIndex - 1);
                 }
             }
 
-            if (largestList == null)
+            int index = sets.indexOf(largestList);
+
+            if (largestList.size() == 0)
                 break;
+
+            for (Integer val : largestList) {
+                containingSets.get(val - 1).clear();
+            }
 
             for (LinkedList<Integer> set : sets) {
                 if (!set.equals(largestList)) {
@@ -96,7 +106,6 @@ public class Redemption extends Task {
     }
 
     public static void main(String[] args) throws IOException {
-        long start = System.currentTimeMillis();
         new Redemption().solve();
     }
 }
