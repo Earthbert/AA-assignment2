@@ -7,7 +7,7 @@ public class Trial extends Task {
     int nrSelectedSets;
 
     String answer;
-    int[][] sets;
+    ArrayList<Integer>[] sets;
     ArrayList<Integer>[] containingSets;
     int[] selectedSets;
 
@@ -28,9 +28,8 @@ public class Trial extends Task {
         nrSets = Integer.parseInt(numbers[1]);
         nrSelectedSets = Integer.parseInt(numbers[2]);
 
-        sets = new int[nrSets][];
+        sets = new ArrayList[nrSets];
         containingSets = new ArrayList[cardinalNr];
-        selectedSets = new int[nrSelectedSets];
 
         for (int i = 0; i < cardinalNr; i++) {
             containingSets[i] = new ArrayList<>();
@@ -39,11 +38,11 @@ public class Trial extends Task {
         for (int i = 0; i < nrSets; i++) {
             numbers = bufferedReader.readLine().split(" ");
             int nrElements = Integer.parseInt(numbers[0]);
-            sets[i] = new int[nrElements];
+            sets[i] = new ArrayList<>();
             for (int j = 0; j < nrElements; j++) {
                 int element;
                 element = Integer.parseInt(numbers[j + 1]);
-                sets[i][j] = element;
+                sets[i].add(element);
                 containingSets[element - 1].add(i + 1);
             }
         }
@@ -99,6 +98,7 @@ public class Trial extends Task {
         File oracleAnswer = new File("sat.sol");
         BufferedReader bufferedReader = new BufferedReader(new FileReader(oracleAnswer));
         answer = bufferedReader.readLine();
+        selectedSets = new int[nrSelectedSets];
 
         if (answer.equals("True")) {
             int nrVariables = Integer.parseInt(bufferedReader.readLine());

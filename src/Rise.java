@@ -1,28 +1,40 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class Rise extends Task{
     int nrOwnedCards;
     int nrWantedCards;
     int nrSets;
 
-    String answer;
-    ArrayList<Integer> ownedCards = new ArrayList<>();
-    ArrayList<Integer> wantedCards = new ArrayList<>();
+    String answer = "False";
+    ArrayList<String> ownedCards = new ArrayList<>();
+    ArrayList<String> wantedCards = new ArrayList<>();
     ArrayList<Integer>[] sets;
-    HashMap<Integer, ArrayList<Integer>> containingSets = new HashMap<>();
+    ArrayList<Integer>[] containingSets;
     int[] selectedSets;
 
-    HashMap<String, Integer> cardIndex = new HashMap<>();
+    HashMap<String, Integer> neededCardsIndex = new HashMap<>();
 
     @Override
     public void solve() throws IOException, InterruptedException {
         readProblemData();
-        formulateOracleQuestion();
-        askOracle();
-        decipherOracleAnswer();
+        Trial trial = new Trial();
+        trial.cardinalNr = neededCardsIndex.size();
+        trial.nrSets = nrSets;
+        trial.sets = sets;
+        trial.containingSets = containingSets;
+        for (int i = 1; i <= nrSets; i++) {
+            trial.nrSelectedSets = i;
+            trial.formulateOracleQuestion();
+            trial.askOracle();
+            trial.decipherOracleAnswer();
+            if (trial.answer.equals("True")) {
+                selectedSets = trial.selectedSets;
+                answer = trial.answer;
+                break;
+            }
+        }
         writeAnswer();
     }
 
@@ -35,18 +47,21 @@ public class Rise extends Task{
         nrSets = Integer.parseInt(numbers[2]);
 
         sets = new ArrayList[nrSets];
-        selectedSets = new int[nrSets];
 
         for (int i = 0; i < nrOwnedCards; i++) {
-            String card = bufferedReader.readLine();
-            cardIndex.computeIfAbsent(card, k -> cardIndex.size() + 1);
-            ownedCards.add(cardIndex.get(card));
+            ownedCards.add(bufferedReader.readLine());
         }
 
         for (int i = 0; i < nrWantedCards; i++) {
             String card = bufferedReader.readLine();
-            cardIndex.putIfAbsent(card, cardIndex.size() + 1);
-            wantedCards.add(cardIndex.get(card));
+            if (!ownedCards.contains(card))
+                neededCardsIndex.putIfAbsent(card, neededCardsIndex.size() + 1);
+            wantedCards.add(card);
+        }
+
+        containingSets = new ArrayList[neededCardsIndex.size()];
+        for (int i = 0; i < neededCardsIndex.size(); i++) {
+            containingSets[i] = new ArrayList<>();
         }
 
         for (int i = 0; i < nrSets; i++) {
@@ -54,16 +69,14 @@ public class Rise extends Task{
             sets[i] = new ArrayList<>();
             for (int j = 0; j < nrCards; j++) {
                 String card = bufferedReader.readLine();
-                cardIndex.computeIfAbsent(card, k -> cardIndex.size() + 1);
-                Integer index = cardIndex.get(card);
-                if (wantedCards.contains(index) && !ownedCards.contains(index)) {
+                Integer index = neededCardsIndex.get(card);
+                if (index != null) {
                     sets[i].add(index);
-                    containingSets.computeIfAbsent(index, k -> new ArrayList<>());
-                    ArrayList<Integer> sets = containingSets.get(index);
-                    sets.add(i + 1);
+                    containingSets[index - 1].add(i + 1);
                 }
             }
         }
+        return;
     }
 
     @Override
@@ -76,6 +89,13 @@ public class Rise extends Task{
 
     @Override
     public void writeAnswer() throws IOException {
+        if (answer.equals("True")) {
+            System.out.println(selectedSets.length);
+            for (final int selectedSet : selectedSets) {
+                System.out.printf("%d ", selectedSet);
+            }
+            System.out.println();
+        }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {

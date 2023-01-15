@@ -11,7 +11,7 @@ run_rise:
 trial: src/Trial.java src/Task.java
 	javac -d $(BUILD_PATH) $^
 
-rise: src/Rise.java src/Task.java
+rise: src/Rise.java src/Task.java src/Trial.java
 	javac -d $(BUILD_PATH) $^
 
 clean:
