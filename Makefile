@@ -9,7 +9,7 @@ run_rise: rise
 	java -cp $(BUILD_PATH) Rise
 
 run_redemption: redemption
-	java -cp $(BUILD_PATH) Rise
+	java -cp $(BUILD_PATH) Redemption
 
 trial: src/Trial.java src/Task.java
 	javac -d $(BUILD_PATH) $^
@@ -21,6 +21,6 @@ redemption: src/Redemption.java src/Task.java
 	javac -d $(BUILD_PATH) $^
 
 clean:
-	rm -f *.class
+	rm -rf $(BUILD_PATH)
 
 .PHONY: build clean

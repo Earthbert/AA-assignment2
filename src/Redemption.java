@@ -1,10 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 public class Redemption extends Task {
     ArrayList<LinkedList<Integer>> sets = new ArrayList<>();
@@ -64,11 +61,7 @@ public class Redemption extends Task {
     }
 
     public void solve() throws IOException {
-        long startTime = System.currentTimeMillis();
         readProblemData();
-        System.out.println("Reading: " + (System.currentTimeMillis() - startTime));
-
-        startTime = System.currentTimeMillis();
 
         while (true) {
             LinkedList<Integer> largestList = null;
@@ -99,12 +92,11 @@ public class Redemption extends Task {
             selectedSets.add(index + 1);
         }
 
-        System.out.println("Solving: " + (System.currentTimeMillis() - startTime));
-
         writeAnswer();
     }
 
     public static void main(String[] args) throws IOException {
+        long start = System.currentTimeMillis();
         new Redemption().solve();
     }
 }
