@@ -76,7 +76,6 @@ public class Rise extends Task{
                 }
             }
         }
-        return;
     }
 
     @Override
